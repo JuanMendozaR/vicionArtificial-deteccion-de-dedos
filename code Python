@@ -1,0 +1,99 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Oct 26 21:48:48 2022
+
+@author: Juan de Dios
+"""
+
+import cv2
+import mediapipe as mp
+import serial, time, json
+
+
+msp = serial.Serial('COM3',115200)
+video = cv2.VideoCapture(0)
+
+hand = mp.solutions.hands
+Hand = hand.Hands(max_num_hands=1)
+mpDraw = mp.solutions.drawing_utils
+
+while True:
+    check ,img = video.read()
+    imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    results = Hand.process(imgRGB)
+    handsPoints = results.multi_hand_landmarks
+    h,w,_ = img.shape
+    pontos = []
+    
+    if handsPoints:
+        for points in handsPoints:
+            #print(points)
+            mpDraw.draw_landmarks(img, points,hand.HAND_CONNECTIONS)
+            for idd, cord in enumerate(points.landmark):
+                cx,cy = int(cord.x*w), int(cord.y*h)
+               # cv2.putText(img,str(idd),(cx,cy+10),cv2.FONT_HERSHEY_SIMPLEX,0.5,(255,0,0),2)
+                pontos.append((cx,cy))
+                
+                
+        dedos = [8,12,16,20]
+    
+        
+        contador = 0
+        
+        if points:
+            
+            
+            
+            if pontos[4][0] < pontos[2][0]:
+                
+                contador +=1
+                
+            for x in dedos:
+                if pontos[x][1] < pontos[x-2][1]:
+                
+                
+                    contador += 1
+                    
+
+                    
+                       
+                    
+                if pontos[8][1]>pontos[6][1]:
+                    msp.write("indice".encode('utf-8'))
+                    #cv2.putText(img,"Indice",(100,100),cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,0),2)
+
+                    
+        
+                    
+                if pontos[12][1]>pontos[8][1]:
+                    msp.write("medio".encode('utf-8'))
+                    #cv2.putText(img,"Medio",(100,100),cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,0),2)
+
+                    
+                    
+                if pontos[16][1]>pontos[14][1]:
+                    msp.write("anular".encode('utf-8'))
+                    #cv2.putText(img,"Anular",(100,100),cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,0),2)
+
+                    
+                
+                if pontos[20][1]>pontos[18][1]:
+                    msp.write("menique".encode('utf-8'))
+                    #cv2.putText(img,"Menique",(100,100),cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,0),2)
+                    
+                                        
+                if pontos[4][0]>pontos[2][0]:
+                    msp.write("pulgar".encode('utf-8'))
+                    
+                    #cv2.putText(img,"Pulgar",(100,100),cv2.FONT_HERSHEY_SIMPLEX,3,(255,255,0),2)
+
+                    
+                    
+        
+    cv2.imshow("Imagem",img)
+  
+    if cv2.waitKey(1) == ord('q'):
+      break
+video.release()
+cv2.destroyAllWindows()
+    
