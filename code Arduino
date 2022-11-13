@@ -1,0 +1,128 @@
+#include <TimeLib.h>
+#include <LiquidCrystal.h>
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+
+
+// initialize the library with the numbers of the interface pins
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+Adafruit_PWMServoDriver Bot = Adafruit_PWMServoDriver();
+unsigned int pos0 = 172;    // ancho de pulso en cuentas para pos 0 grados
+unsigned int pos180 = 565;   // ancho de pulso en cuentas para pos 180 grados
+
+String inputString;
+int ser[6] = {120,120,100,100,100};
+void posServo(uint8_t n_servo, int angulo)
+{
+  int ciclo;
+  ciclo =  map(angulo,0,180,pos0,pos180);   // map es para hacer equivalencia entre diferentes rangos
+  Bot.setPWM(n_servo,0,ciclo);
+}
+
+void setup() {
+
+  Bot.begin();          // iniciamos Bot
+  Bot.setPWMFreq(60);
+  Serial.begin(115200);
+  inputString.reserve(200);  
+  lcd.begin(16,2);
+
+  for(int i = 0;i<6;i++)
+{
+  posServo(i,ser[i] );
+  delay(80);
+}
+
+  delay(1000);
+  lcd.setCursor(0,0);
+  lcd.print("Welcome!");
+  delay(1000);
+  lcd.clear();
+
+  lcd.setCursor(0,0);
+  lcd.print("Contando dedos");
+  lcd.setCursor(6,1);
+  delay(1000);
+  lcd.print("con");
+  delay(1000);
+  lcd.clear();
+
+  lcd.setCursor(0,0);
+  lcd.print("Vision");
+  lcd.setCursor(5,1);
+  delay(1000);
+  lcd.print("artificial");
+  delay(1000);
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print("Python & Arduino");
+  lcd.setCursor(4,1);
+  delay(2000);
+  lcd.print("Q-BIT");
+  delay(1000);
+  lcd.clear();
+
+}
+void loop() {
+ delay(100);
+  SerialEvent();
+    
+}
+void SerialEvent(){
+  while (Serial.available()){
+    char inputChar = Serial.read();
+       
+    inputString += inputChar;
+    }
+    if(inputString.indexOf("indice")>=0) {
+      lcd.clear();
+      lcd.setCursor(5,1);
+      lcd.print("Indice");
+      posServo(0,180);
+      delay(100);
+  
+    }
+    else if(inputString.indexOf("medio")>=0) {
+      lcd.clear();
+      lcd.setCursor(5,1);
+      lcd.print("Medio");
+      posServo(1,180);      //     e
+      delay(100);
+    
+    }
+    else if(inputString.indexOf("anular")>=0) {
+    lcd.clear();
+    lcd.setCursor(5,1);
+    lcd.print("Anular");
+    posServo(2,180);      //     e
+    delay(100);
+ 
+    }
+    else if(inputString.indexOf("menique")>=0) {
+      lcd.clear();
+      lcd.setCursor(5,1);
+      lcd.print("Menique");
+      posServo(3,180);      //     e
+      delay(100);
+    
+ 
+     }
+    else if(inputString.indexOf("pulgar")>=0) {
+      lcd.clear();
+      lcd.setCursor(5,1);
+      lcd.print("Pulgar");
+      posServo(4,180);      //     e
+      delay(100);
+     
+      }
+      else{
+        for(int i = 0;i<6;i++){
+        posServo(i,ser[i] );
+        delay(80);
+        
+        }
+      }
+      inputString = "";
+
+  }
+  
